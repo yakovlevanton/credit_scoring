@@ -8,7 +8,7 @@ The dataset for this task can be downloaded from the following link:
 It is recommended to unzip the archive into the `data/raw` directory in the root of the repository.  
 
 The dataset consists of 8 `*.csv` files. The data schema is shown below:  
-![data_scheme](images/data_scheme.png)
+![dataset_scheme](images/dataset_scheme.png)
 
 I used 4 of them: main application and client information in  
 `application_train.csv` and `application_test.csv`, information about past  
