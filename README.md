@@ -10,28 +10,73 @@ It is recommended to unzip the archive into the `data/raw` directory in the root
 The dataset consists of 8 `*.csv` files. The data schema is shown below:  
 ![dataset_scheme](images/dataset_scheme.png)
 
-I used 4 of them: main application and client information in  
+I used 6 of them: main application and client information in  
 `application_train.csv` and `application_test.csv`, information about past  
 debts to other credit organizations in `bureau.csv`, and information about  
-previous applications to the same bank in `previous_application.csv`.
+previous applications to the same bank in `previous_application.csv`. Also  
+I used some behaviour and payment discipline features from `instalment_payments.csv`  
+and `credit_card_balance.csv`.
 
 ## Approach Used  
-* **Data preprocessing**: removing features with >50% missing values, weak correlation with the target variable,
-  strong correlation with each other, and low informativeness. Handling anomalies in the data, creating
-  additional useful features and aggregated features based on other tables.  
-* **Model**: `CatBoostClassifier`, since there are many categorical features and features with `NaN` values.  
-* **Validation**: standard 80/20 split.  
-* **Loss function**: `LogLoss` — a classic choice for binary classification.  
-* **Evaluation metric**: `AUC ROC`, because it shows how well the model distinguishes between default and reliable  
-  clients, regardless of the classification threshold (it is computed on probabilities, not labels), and is  
-  robust to class imbalance.
+### **Data preprocessing**
+
+- Aggregated external tables (`previous_application`, `bureau`, `installments_payments`, `credit_card_balance`) at the client level (`SK_ID_CURR`).
+- Created behavioral features:
+  - delinquency ratios,
+  - maximum delays,
+  - credit utilization metrics,
+  - payment gap indicators,
+  - balance trends.
+- Numerical features were quantile-binned.
+- Missing values were treated as a separate bin.
+- All binned features were transformed using **Weight of Evidence (WOE)** encoding.
+- Feature selection was performed using:
+  - Information Value (IV),
+  - Gini coefficient,
+  - Wald test (p-values),
+  - multicollinearity (VIF) checks.
+
+---
+
+### **Model**
+
+- **Logistic Regression** trained on WOE-transformed features.
+- Chosen for:
+  - interpretability,
+  - stability,
+  - compliance with classical PD modeling standards.
+
+Two model variants were evaluated:
+- Baseline model without `EXT_SOURCE` features.
+- Enhanced model including `EXT_SOURCE_1/2/3` (external risk proxies).
+
+---
+
+### **Validation**
+
+- Standard 80/20 user-based split.
+- All preprocessing steps (binning, WOE mapping, aggregations) were fitted on the training set only and then applied to validation data to prevent data leakage.
+
+---
+
+### **Loss Function**
+
+- Logistic loss (binary cross-entropy), relating to to Logistic Regression.
+
+---
+
+### **Evaluation Metric**
+
+- **AUC ROC**
+
+Chosen because:
+- It measures ranking quality instead of classification accuracy.
+- It evaluates predicted probabilities rather than hard labels.
+- It is a standard metric in credit risk modeling.
   
 ## Results  
-* Validation metric: `AUC ROC = 0.77`  
-* Metric on the private test set (from Kaggle): `AUC ROC = 0.76`  
-* Thus, the model demonstrated fairly good performance and generalization ability.  
-* The contribution of the most important features to the model predictions is shown below:  
-![shap_values](images/shap.png)
+* Validation metric: `AUC ROC = 0.75`  
+* Metric on the private test set (from Kaggle): `AUC ROC = `   
 
 ## How to Run  
 1) Clone the repository  
