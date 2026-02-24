@@ -10,19 +10,17 @@ It is recommended to unzip the archive into the `data/raw` directory in the root
 The dataset consists of 8 `*.csv` files. The data schema is shown below:  
 ![dataset_scheme](images/dataset_scheme.png)
 
-I used 6 of them: main application and client information in  
-`application_train.csv` and `application_test.csv`, information about past  
-debts to other credit organizations in `bureau.csv`, and information about  
-previous applications to the same bank in `previous_application.csv`. Also  
-I used some behaviour and payment discipline features from `instalment_payments.csv`  
-and `credit_card_balance.csv`.
+I used 6 of them: main application and client information in `application_train.csv` and `application_test.csv`,  
+information about past debts to other credit organizations in `bureau.csv`, and information about  previous  
+applications to the same bank in `previous_application.csv`.  
+Also I used some behaviour and payment discipline features from `instalment_payments.csv` and `credit_card_balance.csv`.
 
 ## Approach Used  
 ### **Data preprocessing**
 
 - Aggregated external tables (`previous_application`, `bureau`, `installments_payments`, `credit_card_balance`) at the client level (`SK_ID_CURR`).
 - Created behavioral features:
-  - delinquency ratios,
+  - overdue rate,
   - maximum delays,
   - credit utilization metrics,
   - payment gap indicators,
@@ -75,8 +73,13 @@ Chosen because:
 - It is a standard metric in credit risk modeling.
   
 ## Results  
-* Validation metric: `AUC ROC = 0.75`  
-* Metric on the private test set (from Kaggle): `AUC ROC = `   
+* Validation metrics: `AUC ROC = 0.715` (without using `EXT_SOURCE_1/2/3` features)  
+and `AUC ROC = 0.75` (with `EXT_SOURCE_1/2/3` features)    
+* Metrics on the private test set (from Kaggle): `AUC ROC = 0.72` (without using `EXT_SOURCE_1/2/3` features),
+and `AUC ROC = 0.74` (with `EXT_SOURCE_1/2/3` features) 
+
+## Importance of the features (from Wald-test)
+![feature_coefficients](images/logreg_coef.png)
 
 ## How to Run  
 1) Clone the repository  
